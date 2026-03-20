@@ -1,6 +1,6 @@
 # 🚀 Aerospace Root-Finding Toolbox
 
-**[🔗 Try the Live Web App Here!](INSERT_YOUR_APP_LINK_HERE)**
+**[🔗 Try the Live Web App Here!](https://aerospace-toolbox-for-fun.streamlit.app/)**
 
 ## 📖 Project Overview
 This repository contains a computational tool designed to solve complex, non-linear equations found in **thermodynamics, gas dynamics, and aerospace propulsion**. 
@@ -24,24 +24,25 @@ Used in the design of converging-diverging nozzles (like rocket engine exhaust n
 * `M` = Mach number
 * `γ` (Gamma) = Specific heat ratio (1.4 for standard air)
 
-### 2. Thermodynamic Heat Transfer (Q_in)
-Evaluates the heat energy added to a system. This is specifically modeled for the combustion chamber phase of a gas turbine engine (Brayton Cycle).
+### 2. Thermal Radiation & Emissivity (T)
+Evaluates the heat transfer rate of a surface via thermal radiation using the Stefan-Boltzmann law. Because temperature is raised to the fourth power, finding the surface temperature given a specific heat transfer rate requires a root-finding algorithm to solve the quartic equation.
 
 **Equation:**
-`Q_in = ṁ * c_p * (T3 - T2)`
+`Q = ε * σ * A * (T⁴ - T_surr⁴)`
 
 *Where:*
-* `Q_in` = Total heat input
-* `ṁ` = Mass flow rate
-* `c_p` = Specific heat at constant pressure
-* `T2` = Compressor exit temperature
-* `T3` = Turbine inlet temperature
+* `Q` = Net heat transfer rate (Watts)
+* `ε` (epsilon) = Emissivity of the surface (0 to 1)
+* `σ` (sigma) = Stefan-Boltzmann constant (5.67 × 10⁻⁸ W/m²K⁴)
+* `A` = Surface area (m²)
+* `T` = Surface temperature (Kelvin)
+* `T_surr` = Surroundings temperature (Kelvin)
 
 ---
 
 ## ⚙️ Core Features
 - **Numerical Solvers:** Implements robust root-finding algorithms (SciPy/NumPy) optimized for non-linear engineering equations.
-- **Aerospace Specific:** Tailored for BEng Aerospace Engineering coursework in thermodynamics and fluid mechanics.
+- **Aerospace Specific:** Tailored for BEng Aerospace Engineering coursework in thermodynamics and heat transfer.
 - **Interactive Interface:** A web-based Graphical User Interface (GUI) built with Streamlit for instant variable input and visualization.
 
 ---
@@ -52,6 +53,6 @@ If you need to run this on your own machine, follow these steps:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/Aerospace-Root-Finding-Toolbox.git
+   git clone https://github.com/ImNewToCoding08/Aerospace-Root-Finding-Toolbox.git
    cd Aerospace-Root-Finding-Toolbox
 
