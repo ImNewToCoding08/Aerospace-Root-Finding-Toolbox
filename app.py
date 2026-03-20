@@ -1,0 +1,96 @@
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+from root_finder import RootFinder
+
+# --- Page Configuration ---
+st.set_page_config(page_title="Aerospace Root-Finding Toolbox", page_icon="🚀", layout="centered")
+
+st.title("🚀 Aerospace Root-Finding Toolbox")
+st.markdown("A numerical methods library comparing **Newton-Raphson**, **Secant**, and **Bisection** algorithms on implicit aerospace equations.")
+
+# --- Sidebar Menu ---
+st.sidebar.header("⚙️ Select a Module")
+module = st.sidebar.radio("Choose a Test Case:", ["Compressible Flow (Area-Mach)", "Satellite Thermal Balance"])
+
+# --- Helper Function for Plotting ---
+def plot_convergence(hist_b, hist_n, hist_s, title):
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(hist_b['iteration'], hist_b['error'], marker='o', label='Bisection', linestyle='--')
+    ax.plot(hist_n['iteration'], hist_n['error'], marker='s', label='Newton-Raphson', linewidth=2)
+    ax.plot(hist_s['iteration'], hist_s['error'], marker='^', label='Secant', linestyle='-.')
+    
+    ax.set_yscale('log')
+    ax.set_xlabel('Iteration Number')
+    ax.set_ylabel('Absolute Error (log scale)')
+    ax.set_title(title)
+    ax.grid(True, which="both", ls="--", alpha=0.6)
+    ax.legend()
+    st.pyplot(fig) # Streamlit command to draw the plot!
+
+# --- Module 1: Compressible Flow ---
+if module == "Compressible Flow (Area-Mach)":
+    st.header("💨 Isentropic Compressible Flow")
+    st.markdown("Calculates the supersonic Mach number of a gas expanding through a nozzle given an Area Ratio ($A/A^*$).")
+    
+    # UI Inputs
+    col1, col2 = st.columns(2)
+    gamma = col1.number_input("Specific Heat Ratio (gamma)", value=1.4, step=0.1)
+    A_ratio = col2.number_input("Target Area Ratio (A/A*)", value=2.0, min_value=1.01, step=0.5)
+    
+    def f(M):
+        if M <= 1.0: return -1.0
+        return (1/M) * ((2 + (gamma - 1) * M**2) / (gamma + 1)) ** ((gamma + 1) / (2 * (gamma - 1))) - A_ratio
+    def df(M):
+        h = 1e-5
+        return (f(M + h) - f(M - h)) / (2 * h)
+
+    if st.button("Calculate Mach Number"):
+        try:
+            root_b, hist_b = RootFinder.bisection(f, 1.01, 10.0)
+            root_n, hist_n = RootFinder.newton_raphson(f, df, 2.5)
+            root_s, hist_s = RootFinder.secant(f, 2.0, 3.0)
+            
+            # Display Results nicely
+            st.success(f"**Result:** The supersonic Mach number is **{root_n:.4f}**")
+            
+            st.subheader("Convergence Diagnostics")
+            m1, m2, m3 = st.columns(3)
+            m1.metric(label="Newton-Raphson", value=f"{len(hist_n)} iters", delta="Fastest", delta_color="normal")
+            m2.metric(label="Secant", value=f"{len(hist_s)} iters")
+            m3.metric(label="Bisection", value=f"{len(hist_b)} iters", delta="Slowest", delta_color="inverse")
+            
+            plot_convergence(hist_b, hist_n, hist_s, f"Algorithm Convergence (A/A* = {A_ratio})")
+        except Exception as e:
+            st.error(f"Calculation Error: {e}")
+
+# --- Module 2: Satellite Thermal Balance ---
+elif module == "Satellite Thermal Balance":
+    st.header("🛰️ Satellite Thermal Balance")
+    st.markdown("Calculates the equilibrium surface temperature of a satellite in a vacuum based on absorbed solar heat flux.")
+    
+    sigma = 5.67e-8  
+    emissivity = st.slider("Surface Emissivity (0 to 1)", min_value=0.1, max_value=1.0, value=0.8, step=0.05)
+    solar_flux = st.number_input("Absorbed Solar Heat Flux (W/m²)", value=1000.0, step=100.0)
+    
+    def f(T): return (emissivity * sigma * T**4) - solar_flux
+    def df(T): return 4 * emissivity * sigma * T**3
+
+    if st.button("Calculate Equilibrium Temperature"):
+        try:
+            root_b, hist_b = RootFinder.bisection(f, 100.0, 1000.0)
+            root_n, hist_n = RootFinder.newton_raphson(f, df, 300.0)
+            root_s, hist_s = RootFinder.secant(f, 250.0, 350.0)
+            
+            celsius = root_n - 273.15
+            st.success(f"**Result:** Surface Temperature is **{root_n:.2f} K** ({celsius:.2f} °C)")
+            
+            st.subheader("Convergence Diagnostics")
+            m1, m2, m3 = st.columns(3)
+            m1.metric(label="Newton-Raphson", value=f"{len(hist_n)} iters")
+            m2.metric(label="Secant", value=f"{len(hist_s)} iters")
+            m3.metric(label="Bisection", value=f"{len(hist_b)} iters")
+            
+            plot_convergence(hist_b, hist_n, hist_s, f"Algorithm Convergence (Q = {solar_flux} W/m²)")
+        except Exception as e:
+            st.error(f"Calculation Error: {e}")
