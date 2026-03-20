@@ -1,5 +1,7 @@
 # 🚀 Aerospace Root-Finding Toolbox
 
+**🌟 [Try the Live Interactive Web App Here!](https://aerospace-toolbox-for-fun.streamlit.app/)**
+
 A comprehensive Python numerical methods library built from scratch to solve complex, implicit aerospace engineering equations where standard algebra fails.
 
 ---
@@ -29,27 +31,6 @@ This Toolbox contains three custom-built algorithms that use different mathemati
 When gas expands through a converging-diverging rocket nozzle, its speed (Mach number, $M$) is determined by how wide the nozzle is compared to the throat ($A/A^*$). 
 
 **The Equation:**
-$$ \frac{A}{A^*} = \frac{1}{M} \left[ \frac{2 + (\gamma - 1)M^2}{\gamma + 1} \right]^{\frac{\gamma + 1}{2(\gamma - 1)}} $$
+```math
+\frac{A}{A^*} = \frac{1}{M} \left[ \frac{2 + (\gamma - 1)M^2}{\gamma + 1} \right]^{\frac{\gamma + 1}{2(\gamma - 1)}}
 
-Because the Mach number ($M$) is stuck inside and outside that massive exponent bracket, you cannot solve for $M$ with algebra. My code subtracts the Area Ratio from both sides and uses the algorithms to hunt down the exact Mach number that balances the equation to zero.
-
-### Module 2: Satellite Thermal Balance
-In the vacuum of space, there is no air to cool things down (no convection). Satellites only lose heat by radiating it away into space. 
-
-**The Equation:**
-$$ Q_{in} = \epsilon \sigma T^4 $$
-
-We want to find the exact Surface Temperature ($T$) of the satellite based on how much heat from the sun ($Q_{in}$) it is absorbing. Because Temperature is raised to the 4th power (Stefan-Boltzmann law), it is a non-linear implicit equation that requires root-finding.
-
----
-
-## 💻 Code Structure
-* `root_finder.py` - The core mathematical engine containing the Bisection, Newton, and Secant classes.
-* `main.py` - The interactive Command Line Interface (CLI) tool. It runs the user's inputs through all three algorithms simultaneously to race them against each other.
-* `test_root_finder.py` - Pytest unit tests. This proves the algorithms work perfectly by testing them against known analytical solutions (like $x^2 - 4 = 0$).
-
-## ⚙️ How to Run Locally
-1. Clone this repository to your machine.
-2. Install the required data science libraries:
-   ```bash
-   pip install pandas matplotlib pytest
