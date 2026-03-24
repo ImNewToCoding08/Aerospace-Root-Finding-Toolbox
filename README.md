@@ -37,13 +37,19 @@ Evaluates the heat transfer rate of a surface via thermal radiation using the St
 * `A` = Surface area (m²)
 * `T` = Surface temperature (Kelvin)
 * `T_surr` = Surroundings temperature (Kelvin)
+### 3. Airfoil Aerodynamics & CG Locator
+Evaluates the Lift, Drag, and Total Aerodynamic forces acting on an aircraft wing. Also includes a component-wise **Center of Gravity (CG) Locator** which evaluates the physical location of the CG and dynamically uses the aircraft chord length to determine the **Static Margin** (longitudinal stability) relative to the Aerodynamic Center.
+
+### 4. Transient Heat Transfer (ODE)
+Simulates the time-temperature history of a satellite using the lumped-capacitance model with thermal radiation. To project thermal cooling/heating trajectories dynamically, this module utilizes **Euler's Method (1st Order)** and **Runge-Kutta 4th Order (RK4)** numerical differential equation solvers, and natively generates trajectory charts.
 
 ---
 
 ## ⚙️ Core Features
-- **Numerical Solvers:** Implements robust root-finding algorithms (SciPy/NumPy) optimized for non-linear engineering equations.
-- **Aerospace Specific:** Tailored for BEng Aerospace Engineering coursework in thermodynamics and heat transfer.
+- **Numerical Solvers:** Implements robust root-finding algorithms (Bisection, Newton-Raphson, Secant) and **ODE Solvers** (Euler, RK4) optimized for non-linear engineering equations.
+- **Aerospace Specific:** Tailored for BEng Aerospace Engineering coursework in aerodynamics, flight stability, thermodynamics, and heat transfer.
 - **Interactive Interface:** A web-based Graphical User Interface (GUI) built with Streamlit for instant variable input and visualization.
+- **Futuristic 3D UI:** A highly polished, custom-injected Streamlit CSS theme featuring a moving 3D cyber-grid background, glowing glassmorphism metric cards, and a sleek deep-space aesthetic.
 
 ---
 
