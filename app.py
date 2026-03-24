@@ -11,61 +11,170 @@ st.set_page_config(page_title="Aerospace Root-Finding Toolbox", page_icon="🚀"
 st.markdown("""
 <style>
 /* Base Modern Typography */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Rajdhani:wght@400;500;600;700&display=swap');
 html, body, [class*="css"]  {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.1rem;
+}
+
+/* Futuristic Sci-Fi Animated Background */
+.stApp {
+    background-color: #050914 !important;
+}
+
+/* Moving Cyber-Grid */
+.stApp::before {
+    content: "";
+    position: fixed;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background-image: 
+        linear-gradient(rgba(0, 210, 255, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 210, 255, 0.07) 1px, transparent 1px);
+    background-size: 50px 50px;
+    transform: perspective(600px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+    animation: cyber-grid 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes cyber-grid {
+    0% { background-position: 0 0; }
+    100% { background-position: 50px 50px; }
+}
+
+/* Floating Energy Orbs */
+.stApp::after {
+    content: "";
+    position: fixed;
+    top: 10%; right: 10%;
+    width: 50vw; height: 50vh;
+    background: radial-gradient(circle, rgba(58, 123, 213, 0.15), transparent 70%);
+    border-radius: 50%;
+    filter: blur(50px);
+    animation: float-orb 15s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes float-orb {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(-100px, 150px) scale(1.3); }
+}
+
+/* Main Content Layering over Background */
+.main {
+    z-index: 1;
+    position: relative;
+    background: transparent !important;
+}
+
+/* Make Sidebar Glassy too */
+[data-testid="stSidebar"] {
+    background: rgba(5, 9, 20, 0.8) !important;
+    backdrop-filter: blur(15px);
+    border-right: 1px solid rgba(0, 210, 255, 0.1);
 }
 
 /* Glassmorphism Metric Cards */
 [data-testid="stMetricValue"] {
+    font-family: 'Orbitron', sans-serif !important;
     font-size: 2.2rem !important;
     font-weight: 700 !important;
     color: #00d2ff !important;
+    text-shadow: 0 0 10px rgba(0, 210, 255, 0.6);
 }
 [data-testid="stMetricLabel"] {
-    font-size: 1rem !important;
+    font-family: 'Rajdhani', sans-serif !important;
+    font-size: 1.1rem !important;
     color: #94a3b8 !important;
-    font-weight: 500 !important;
-    margin-bottom: 0.5rem;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 div[data-testid="metric-container"] {
-    background: rgba(17, 24, 39, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(10, 14, 23, 0.85), rgba(17, 24, 39, 0.7));
+    border: 1px solid rgba(0, 210, 255, 0.2);
+    border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 210, 255, 0.05);
     backdrop-filter: blur(12px);
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 div[data-testid="metric-container"]:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 20px -3px rgba(0, 210, 255, 0.15), 0 4px 6px -2px rgba(0, 210, 255, 0.05);
-    border: 1px solid rgba(0, 210, 255, 0.3);
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 35px -5px rgba(0, 210, 255, 0.3), inset 0 0 20px rgba(0, 210, 255, 0.15);
+    border: 1px solid rgba(0, 210, 255, 0.6);
 }
 
-/* Beautiful Gradients for Headers */
+/* Headings with Glowing Sci-Fi Text */
 h1, h2, h3 {
+    font-family: 'Orbitron', sans-serif !important;
     background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: 800 !important;
-    letter-spacing: -0.5px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 30px rgba(0, 210, 255, 0.3);
 }
 
-/* Premium Buttons */
+/* Premium Sci-Fi Buttons */
 .stButton > button {
-    background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
-    color: white !important;
+    background: linear-gradient(135deg, rgba(0, 210, 255, 0.05), rgba(58, 123, 213, 0.05));
+    color: #00d2ff !important;
+    border: 1px solid #00d2ff;
     border-radius: 8px;
-    border: none;
     padding: 0.6rem 1.5rem;
+    font-family: 'Orbitron', sans-serif !important;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
     transition: all 0.3s ease;
     width: 100%;
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
 }
 .stButton > button:hover {
+    background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+    color: #ffffff !important;
     transform: scale(1.02);
-    box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+    box-shadow: 0 0 25px rgba(0, 210, 255, 0.5);
+    border: 1px solid transparent;
+}
+
+/* Input Boxes - Futuristic Styling */
+.stTextInput > div > div > input,
+.stNumberInput > div > div > input {
+    background: rgba(10, 14, 23, 0.6) !important;
+    border: 1px solid rgba(0, 210, 255, 0.2) !important;
+    color: #00d2ff !important;
+    border-radius: 8px !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-weight: 500 !important;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+.stTextInput > div > div > input:focus,
+.stNumberInput > div > div > input:focus {
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.3) !important;
+    border-color: #00d2ff !important;
+}
+
+/* Custom expander headers */
+.streamlit-expanderHeader {
+    font-family: 'Orbitron', sans-serif !important;
+    color: #e2e8f0 !important;
+}
+
+/* Fancy Success/Warning Alerts */
+[data-testid="stAlert"] {
+    background: rgba(10, 14, 23, 0.8) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(0, 210, 255, 0.3) !important;
+    border-left: 4px solid #00d2ff !important;
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.1) !important;
+    border-radius: 8px !important;
+    font-family: 'Rajdhani', sans-serif !important;
+    color: #e2e8f0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
