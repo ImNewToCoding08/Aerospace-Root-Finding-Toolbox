@@ -288,6 +288,33 @@ elif module == "Airfoil Aerodynamics":
         Cl = col5.number_input("Coefficient of Lift (Cl)", value=0.5, step=0.1)
         Cd = col6.number_input("Coefficient of Drag (Cd)", value=0.02, step=0.01)
         Cm_ac = col7.number_input("Moment Coeff at AC (Cm_ac)", value=-0.05, step=0.01)
+        
+    with st.expander("⚖️ Center of Gravity (CG) Locator", expanded=False):
+        st.markdown("Calculate the physical CG and **Static Margin** based on component weights and arms (distance from Leading Edge).")
+        w1, a1 = st.columns(2)
+        w_empty = w1.number_input("Empty Weight (kg)", value=1200.0, step=100.0)
+        arm_empty = a1.number_input("Empty Weight Arm (m)", value=1.0, step=0.1)
+        
+        w2, a2 = st.columns(2)
+        w_payload = w2.number_input("Payload Weight (kg)", value=300.0, step=50.0)
+        arm_payload = a2.number_input("Payload Arm (m)", value=1.5, step=0.1)
+        
+        w3, a3 = st.columns(2)
+        w_fuel = w3.number_input("Fuel Weight (kg)", value=150.0, step=10.0)
+        arm_fuel = a3.number_input("Fuel Arm (m)", value=0.8, step=0.1)
+        
+        total_weight = w_empty + w_payload + w_fuel
+        if total_weight > 0:
+            cg_location = ((w_empty * arm_empty) + (w_payload * arm_payload) + (w_fuel * arm_fuel)) / total_weight
+            static_margin = ((0.25 * chord) - cg_location) / chord * 100 # AC assumed at c/4
+            
+            cgm1, cgm2 = st.columns(2)
+            cgm1.metric("CG Location (from LE)", f"{cg_location:.3f} m")
+            cgm2.metric("Static Margin", f"{static_margin:.1f}%")
+            if static_margin < 0:
+                st.error("⚠️ Negative Static Margin! Aircraft is longitudinally unstable.")
+            else:
+                st.success("✅ Aircraft is longitudinally stable.")
     
     st.markdown("<br>", unsafe_allow_html=True) # Adds a little spacing before the button
     

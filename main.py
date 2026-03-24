@@ -134,6 +134,32 @@ def airfoil_analysis():
         xcp_chord_ratio = 0.25 - (Cm_ac / denom)
         xcp_position = chord * xcp_chord_ratio
         print(f"  Center of Pressure (x_cp): {xcp_position:.3f} m from LE ({xcp_chord_ratio*100:.1f}% c)")
+        
+    print("\n--- ⚖️ CENTER OF GRAVITY (CG) LOCATOR ---")
+    calc_cg = input("Do you want to locate the CG and find Static Margin? (y/n): ").strip().lower() == 'y'
+    if calc_cg:
+        try:
+            w_empty = get_input("  Enter Empty Weight [kg] (default 1200.0): ", 1200.0)
+            arm_empty = get_input("  Enter Empty Weight Arm from LE [m] (default 1.0): ", 1.0)
+            w_payload = get_input("  Enter Payload Weight [kg] (default 300.0): ", 300.0)
+            arm_payload = get_input("  Enter Payload Arm from LE [m] (default 1.5): ", 1.5)
+            w_fuel = get_input("  Enter Fuel Weight [kg] (default 150.0): ", 150.0)
+            arm_fuel = get_input("  Enter Fuel Arm from LE [m] (default 0.8): ", 0.8)
+            
+            total_w = w_empty + w_payload + w_fuel
+            cg_loc = ((w_empty*arm_empty) + (w_payload*arm_payload) + (w_fuel*arm_fuel)) / total_w
+            sm = ((0.25*chord) - cg_loc) / chord * 100
+            
+            print(f"\n⚖️ CG Locator Results:")
+            print(f"  Total Weight:              {total_w:.2f} kg")
+            print(f"  CG Location (x_cg):        {cg_loc:.3f} m from LE")
+            print(f"  Static Margin:             {sm:.1f}%")
+            if sm < 0:
+                print("  ⚠️ WARNING: Negative Static Margin. Aircraft is longitudinally UNSTABLE.")
+            else:
+                print("  ✅ Aircraft is longitudinally STABLE.")
+        except ValueError:
+            print("❌ Invalid input inside CG Locator!")
 
 def transient_heating():
     """Test Case 4: Transient Heat Transfer (ODE)"""
