@@ -7,6 +7,68 @@ from root_finder import RootFinder
 # --- Page Configuration ---
 st.set_page_config(page_title="Aerospace Root-Finding Toolbox", page_icon="🚀", layout="centered")
 
+st.markdown("""
+<style>
+/* Base Modern Typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+html, body, [class*="css"]  {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Glassmorphism Metric Cards */
+[data-testid="stMetricValue"] {
+    font-size: 2.2rem !important;
+    font-weight: 700 !important;
+    color: #00d2ff !important;
+}
+[data-testid="stMetricLabel"] {
+    font-size: 1rem !important;
+    color: #94a3b8 !important;
+    font-weight: 500 !important;
+    margin-bottom: 0.5rem;
+}
+div[data-testid="metric-container"] {
+    background: rgba(17, 24, 39, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(12px);
+    transition: all 0.3s ease;
+}
+div[data-testid="metric-container"]:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px -3px rgba(0, 210, 255, 0.15), 0 4px 6px -2px rgba(0, 210, 255, 0.05);
+    border: 1px solid rgba(0, 210, 255, 0.3);
+}
+
+/* Beautiful Gradients for Headers */
+h1, h2, h3 {
+    background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800 !important;
+    letter-spacing: -0.5px;
+}
+
+/* Premium Buttons */
+.stButton > button {
+    background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+    color: white !important;
+    border-radius: 8px;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+.stButton > button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+}
+</style>
+""", unsafe_allow_html=True)
+
 st.title("🚀 Aerospace Root-Finding Toolbox")
 st.markdown("A numerical methods library comparing **Newton-Raphson**, **Secant**, and **Bisection** algorithms on implicit aerospace equations.")
 
@@ -109,13 +171,15 @@ elif module == "Airfoil Aerodynamics":
     area = col3.number_input("Wing Area (S) [m²]", value=10.0, min_value=0.1, step=1.0)
     chord = col4.number_input("Chord Length (c) [m]", value=1.0, min_value=0.01, step=0.1)
     
-    st.subheader("Aerodynamic Coefficients")
-    col5, col6, col7 = st.columns(3)
-    Cl = col5.number_input("Coefficient of Lift (Cl)", value=0.5, step=0.1)
-    Cd = col6.number_input("Coefficient of Drag (Cd)", value=0.02, step=0.01)
-    Cm_ac = col7.number_input("Moment Coeff at AC (Cm_ac)", value=-0.05, step=0.01)
-    
     alpha_deg = st.number_input("Angle of Attack (alpha) [degrees]", value=5.0, step=1.0)
+    
+    with st.expander("⚙️ Advanced Aerodynamic Coefficients", expanded=False):
+        col5, col6, col7 = st.columns(3)
+        Cl = col5.number_input("Coefficient of Lift (Cl)", value=0.5, step=0.1)
+        Cd = col6.number_input("Coefficient of Drag (Cd)", value=0.02, step=0.01)
+        Cm_ac = col7.number_input("Moment Coeff at AC (Cm_ac)", value=-0.05, step=0.01)
+    
+    st.markdown("<br>", unsafe_allow_html=True) # Adds a little spacing before the button
     
     if st.button("Calculate Aerodynamic Characteristics"):
         q = 0.5 * density * velocity**2
