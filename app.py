@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import math
 from root_finder import RootFinder
+from ode_solver import ODESolver
 
 # --- Page Configuration ---
 st.set_page_config(page_title="Aerospace Root-Finding Toolbox", page_icon="🚀", layout="centered")
@@ -74,7 +75,7 @@ st.markdown("A numerical methods library comparing **Newton-Raphson**, **Secant*
 
 # --- Sidebar Menu ---
 st.sidebar.header("⚙️ Select a Module")
-module = st.sidebar.radio("Choose a Test Case:", ["Compressible Flow (Area-Mach)", "Satellite Thermal Balance", "Airfoil Aerodynamics"])
+module = st.sidebar.radio("Choose a Test Case:", ["Compressible Flow (Area-Mach)", "Satellite Thermal Balance", "Airfoil Aerodynamics", "Transient Heat Transfer (ODE)"])
 
 # --- Helper Function for Plotting ---
 def plot_convergence(hist_b, hist_n, hist_s, title):
@@ -204,3 +205,71 @@ elif module == "Airfoil Aerodynamics":
             xcp_chord_ratio = 0.25 - (Cm_ac / denom)
             xcp_position = chord * xcp_chord_ratio
             m4.metric(label="Center of Pressure (from LE)", value=f"{xcp_position:.3f} m ({xcp_chord_ratio*100:.1f}% c)")
+
+# --- Module 4: Transient Heat Transfer (ODE) ---
+elif module == "Transient Heat Transfer (ODE)":
+    st.header("🕰️ Transient Heat Transfer (ODE)")
+    st.markdown("Simulates the time-temperature history of a satellite using the lumped-capacitance model numerical evaluation.")
+    
+    col1, col2, col3 = st.columns(3)
+    mass = col1.number_input("Mass (kg)", value=50.0, min_value=1.0)
+    cp = col2.number_input("Specific Heat (J/kg·K)", value=900.0, min_value=1.0)
+    area = col3.number_input("Surface Area (m²)", value=2.0, min_value=0.1)
+    
+    with st.expander("⚙️ Thermal Environment & Initial Conditions", expanded=True):
+        c4, c5, c6 = st.columns(3)
+        emissivity = c4.number_input("Emissivity (ε)", value=0.8, step=0.05, min_value=0.01, max_value=1.0)
+        solar_flux = c5.number_input("Absorbed Solar Flux (W)", value=500.0, step=50.0)
+        t0_temp = c6.number_input("Initial Temp (K)", value=200.0, step=10.0)
+        
+        c7, c8 = st.columns(2)
+        t_span = c7.number_input("Simulate for (seconds)", value=10000.0, step=1000.0)
+        dt = c8.number_input("Time Step Δt (seconds)", value=50.0, step=10.0)
+        
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    if st.button("Run Numerical Simulation"):
+        sigma = 5.67e-8
+        
+        # ODE function: dT/dt = (Qin - eps * sigma * A * T^4) / (m * cp)
+        def dT_dt(t, T):
+            return (solar_flux - emissivity * sigma * area * (T**4)) / (mass * cp)
+            
+        with st.spinner("Simulating..."):
+            hist_euler = ODESolver.euler(dT_dt, t0_temp, 0, t_span, dt)
+            hist_rk4 = ODESolver.rk4(dT_dt, t0_temp, 0, t_span, dt)
+        
+        st.success("Simulation Complete!")
+        
+        final_euler = hist_euler.iloc[-1]['Temperature']
+        final_rk4 = hist_rk4.iloc[-1]['Temperature']
+        
+        m1, m2 = st.columns(2)
+        m1.metric("Final Temp (Euler 1st Order)", f"{final_euler:.2f} K")
+        m2.metric("Final Temp (Runge-Kutta 4th Order)", f"{final_rk4:.2f} K")
+        
+        # Custom matplotlib theme for dark mode
+        fig, ax = plt.subplots(figsize=(10, 5))
+        fig.patch.set_facecolor('#0a0e17')
+        ax.set_facecolor('#111827')
+        ax.plot(hist_euler['time'], hist_euler['Temperature'], label='Euler Method', linestyle='--', color='#ff4b4b')
+        ax.plot(hist_rk4['time'], hist_rk4['Temperature'], label='RK4 Method', linewidth=2, color='#00d2ff')
+        
+        ax.tick_params(colors='#e2e8f0')
+        ax.xaxis.label.set_color('#e2e8f0')
+        ax.yaxis.label.set_color('#e2e8f0')
+        ax.title.set_color('#e2e8f0')
+        
+        for spine in ax.spines.values():
+            spine.set_color('#334155')
+            
+        ax.set_xlabel("Time (seconds)")
+        ax.set_ylabel("Temperature (K)")
+        ax.set_title(f"Satellite Transient Cooling / Heating")
+        ax.grid(True, which="both", ls="--", alpha=0.2, color='#e2e8f0')
+        
+        legend = ax.legend(facecolor='#111827', edgecolor='#334155')
+        for text in legend.get_texts():
+            text.set_color("#e2e8f0")
+            
+        st.pyplot(fig)

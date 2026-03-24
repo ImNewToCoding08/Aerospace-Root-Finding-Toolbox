@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from root_finder import RootFinder
+from ode_solver import ODESolver
 
 def plot_convergence(hist_b, hist_n, hist_s, title):
     """Helper function to visualize algorithm performance"""
@@ -134,6 +135,43 @@ def airfoil_analysis():
         xcp_position = chord * xcp_chord_ratio
         print(f"  Center of Pressure (x_cp): {xcp_position:.3f} m from LE ({xcp_chord_ratio*100:.1f}% c)")
 
+def transient_heating():
+    """Test Case 4: Transient Heat Transfer (ODE)"""
+    print("\n--- 🕰️ TEST CASE 4: TRANSIENT HEAT TRANSFER (ODE) ---")
+    try:
+        def get_input(prompt, default_val):
+            val = input(prompt)
+            return float(val) if val.strip() else default_val
+            
+        mass = get_input("Enter Mass [kg] (default 50.0): ", 50.0)
+        cp = get_input("Enter Specific Heat [J/kg.K] (default 900.0): ", 900.0)
+        area = get_input("Enter Surface Area [m^2] (default 2.0): ", 2.0)
+        emissivity = get_input("Enter Emissivity (default 0.8): ", 0.8)
+        solar_flux = get_input("Enter Absorbed Solar Flux [W] (default 500.0): ", 500.0)
+        t0_temp = get_input("Enter Initial Temp [K] (default 200.0): ", 200.0)
+        t_span = get_input("Enter Simulation Time [s] (default 10000.0): ", 10000.0)
+        dt = get_input("Enter Time Step [s] (default 50.0): ", 50.0)
+    except ValueError:
+        print("❌ Invalid input! Returning to menu...")
+        return
+        
+    sigma = 5.67e-8
+    
+    def dT_dt(t, T):
+        return (solar_flux - emissivity * sigma * area * (T**4)) / (mass * cp)
+        
+    print("\n⚙️ Running Numerical ODE Solvers...")
+    
+    hist_euler = ODESolver.euler(dT_dt, t0_temp, 0, t_span, dt)
+    hist_rk4 = ODESolver.rk4(dT_dt, t0_temp, 0, t_span, dt)
+    
+    final_euler = hist_euler.iloc[-1]['Temperature']
+    final_rk4 = hist_rk4.iloc[-1]['Temperature']
+    
+    print("\n✅ Simulation Complete:")
+    print(f"  Final Temp (Euler 1st Order):       {final_euler:.2f} K")
+    print(f"  Final Temp (Runge-Kutta 4th Order): {final_rk4:.2f} K")
+
 def main_menu():
     """The main interface for the toolbox."""
     while True:
@@ -144,9 +182,10 @@ def main_menu():
         print("1. Compare Methods on Compressible Flow")
         print("2. Compare Methods on Implicit Heat Transfer")
         print("3. Airfoil Aerodynamics Analysis")
-        print("4. Exit Toolbox")
+        print("4. Transient Heat Transfer (ODE)")
+        print("5. Exit Toolbox")
         
-        choice = input("\nSelect an option (1-4): ")
+        choice = input("\nSelect an option (1-5): ")
         
         if choice == '1': 
             compare_methods_flow()
@@ -154,11 +193,13 @@ def main_menu():
             compare_methods_heat()
         elif choice == '3':
             airfoil_analysis()
-        elif choice == '4': 
+        elif choice == '4':
+            transient_heating()
+        elif choice == '5': 
             print("\nExiting Toolbox. Goodbye! 👋")
             break
         else: 
-            print("\n❌ Invalid choice. Please type 1, 2, 3, or 4.")
+            print("\n❌ Invalid choice. Please type 1, 2, 3, 4, or 5.")
             continue
             
         # The new prompt to keep the user in the app!
