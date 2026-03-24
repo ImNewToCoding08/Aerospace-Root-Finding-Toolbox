@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import math
 from root_finder import RootFinder
 
 # --- Page Configuration ---
@@ -11,7 +12,7 @@ st.markdown("A numerical methods library comparing **Newton-Raphson**, **Secant*
 
 # --- Sidebar Menu ---
 st.sidebar.header("⚙️ Select a Module")
-module = st.sidebar.radio("Choose a Test Case:", ["Compressible Flow (Area-Mach)", "Satellite Thermal Balance"])
+module = st.sidebar.radio("Choose a Test Case:", ["Compressible Flow (Area-Mach)", "Satellite Thermal Balance", "Airfoil Aerodynamics"])
 
 # --- Helper Function for Plotting ---
 def plot_convergence(hist_b, hist_n, hist_s, title):
@@ -47,7 +48,7 @@ if module == "Compressible Flow (Area-Mach)":
 
     if st.button("Calculate Mach Number"):
         try:
-            root_b, hist_b = RootFinder.bisection(f, 1.01, 10.0)
+            root_b, hist_b = RootFinder.bisection(f, 1.01, 1000.0)
             root_n, hist_n = RootFinder.newton_raphson(f, df, 2.5)
             root_s, hist_s = RootFinder.secant(f, 2.0, 3.0)
             
@@ -78,7 +79,7 @@ elif module == "Satellite Thermal Balance":
 
     if st.button("Calculate Equilibrium Temperature"):
         try:
-            root_b, hist_b = RootFinder.bisection(f, 100.0, 1000.0)
+            root_b, hist_b = RootFinder.bisection(f, 1.0, 1e7)
             root_n, hist_n = RootFinder.newton_raphson(f, df, 300.0)
             root_s, hist_s = RootFinder.secant(f, 250.0, 350.0)
             
@@ -94,3 +95,48 @@ elif module == "Satellite Thermal Balance":
             plot_convergence(hist_b, hist_n, hist_s, f"Algorithm Convergence (Q = {solar_flux} W/m²)")
         except Exception as e:
             st.error(f"Calculation Error: {e}")
+
+# --- Module 3: Airfoil Analysis ---
+elif module == "Airfoil Aerodynamics":
+    st.header("🛩️ Airfoil Aerodynamics")
+    st.markdown("Calculates the Lift, Drag, Total Aerodynamic Force, and Center of Pressure based on airfoil characteristics.")
+    
+    col1, col2 = st.columns(2)
+    velocity = col1.number_input("Free-stream Velocity (v) [m/s]", value=100.0, step=10.0)
+    density = col2.number_input("Air Density (rho) [kg/m³]", value=1.225, step=0.1)
+    
+    col3, col4 = st.columns(2)
+    area = col3.number_input("Wing Area (S) [m²]", value=10.0, min_value=0.1, step=1.0)
+    chord = col4.number_input("Chord Length (c) [m]", value=1.0, min_value=0.01, step=0.1)
+    
+    st.subheader("Aerodynamic Coefficients")
+    col5, col6, col7 = st.columns(3)
+    Cl = col5.number_input("Coefficient of Lift (Cl)", value=0.5, step=0.1)
+    Cd = col6.number_input("Coefficient of Drag (Cd)", value=0.02, step=0.01)
+    Cm_ac = col7.number_input("Moment Coeff at AC (Cm_ac)", value=-0.05, step=0.01)
+    
+    alpha_deg = st.number_input("Angle of Attack (alpha) [degrees]", value=5.0, step=1.0)
+    
+    if st.button("Calculate Aerodynamic Characteristics"):
+        q = 0.5 * density * velocity**2
+        lift = q * area * Cl
+        drag = q * area * Cd
+        total_force = math.sqrt(lift**2 + drag**2)
+        
+        alpha_rad = math.radians(alpha_deg)
+        denom = (Cl * math.cos(alpha_rad) + Cd * math.sin(alpha_rad))
+        
+        st.success("Analysis Complete!")
+        m1, m2 = st.columns(2)
+        m1.metric(label="Lift Force (N)", value=f"{lift:.2f}")
+        m2.metric(label="Drag Force (N)", value=f"{drag:.2f}")
+        
+        m3, m4 = st.columns(2)
+        m3.metric(label="Total Aerodynamic Force (N)", value=f"{total_force:.2f}")
+        
+        if denom == 0:
+            st.warning("Cannot calculate Center of Pressure: Net normal force implies division by zero.")
+        else:
+            xcp_chord_ratio = 0.25 - (Cm_ac / denom)
+            xcp_position = chord * xcp_chord_ratio
+            m4.metric(label="Center of Pressure (from LE)", value=f"{xcp_position:.3f} m ({xcp_chord_ratio*100:.1f}% c)")

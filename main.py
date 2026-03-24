@@ -45,7 +45,7 @@ def compare_methods_flow():
     
     print("\n⚙️ Running Iterative Methods...")
     try:
-        root_b, hist_b = RootFinder.bisection(f, 1.01, 10.0)
+        root_b, hist_b = RootFinder.bisection(f, 1.01, 1000.0)
         root_n, hist_n = RootFinder.newton_raphson(f, df, 2.5)
         root_s, hist_s = RootFinder.secant(f, 2.0, 3.0)
         
@@ -79,7 +79,7 @@ def compare_methods_heat():
         
     print("\n⚙️ Running Iterative Methods...")
     try:
-        root_b, hist_b = RootFinder.bisection(f, 100.0, 1000.0)
+        root_b, hist_b = RootFinder.bisection(f, 1.0, 1e7)
         root_n, hist_n = RootFinder.newton_raphson(f, df, 300.0)
         root_s, hist_s = RootFinder.secant(f, 250.0, 350.0)
         
@@ -93,6 +93,47 @@ def compare_methods_heat():
     except Exception as e:
         print(f"❌ Calculation Error: {e}")
 
+def airfoil_analysis():
+    """Test Case 3: Airfoil Aerodynamics"""
+    print("\n--- 🛩️ TEST CASE 3: AIRFOIL AERODYNAMICS ---")
+    import math
+    try:
+        def get_input(prompt, default_val):
+            val = input(prompt)
+            return float(val) if val.strip() else default_val
+            
+        velocity = get_input("Enter Free-stream Velocity [m/s] (default 100.0): ", 100.0)
+        density = get_input("Enter Air Density [kg/m^3] (default 1.225): ", 1.225)
+        area = get_input("Enter Wing Area [m^2] (default 10.0): ", 10.0)
+        chord = get_input("Enter Chord Length [m] (default 1.0): ", 1.0)
+        Cl = get_input("Enter Coefficient of Lift (default 0.5): ", 0.5)
+        Cd = get_input("Enter Coefficient of Drag (default 0.02): ", 0.02)
+        Cm_ac = get_input("Enter Moment Coefficient at AC (default -0.05): ", -0.05)
+        alpha_deg = get_input("Enter Angle of Attack [degrees] (default 5.0): ", 5.0)
+    except ValueError:
+        print("❌ Invalid input! Returning to menu...")
+        return
+        
+    q = 0.5 * density * velocity**2
+    lift = q * area * Cl
+    drag = q * area * Cd
+    total_force = math.sqrt(lift**2 + drag**2)
+    
+    alpha_rad = math.radians(alpha_deg)
+    denom = (Cl * math.cos(alpha_rad) + Cd * math.sin(alpha_rad))
+    
+    print("\n✅ Results:")
+    print(f"  Lift Force:                {lift:.2f} N")
+    print(f"  Drag Force:                {drag:.2f} N")
+    print(f"  Total Aerodynamic Force:   {total_force:.2f} N")
+    
+    if denom == 0:
+        print("  Center of Pressure:        Undefined (Net normal force is zero)")
+    else:
+        xcp_chord_ratio = 0.25 - (Cm_ac / denom)
+        xcp_position = chord * xcp_chord_ratio
+        print(f"  Center of Pressure (x_cp): {xcp_position:.3f} m from LE ({xcp_chord_ratio*100:.1f}% c)")
+
 def main_menu():
     """The main interface for the toolbox."""
     while True:
@@ -102,19 +143,22 @@ def main_menu():
         print("Select a test case to run convergence diagnostics:")
         print("1. Compare Methods on Compressible Flow")
         print("2. Compare Methods on Implicit Heat Transfer")
-        print("3. Exit Toolbox")
+        print("3. Airfoil Aerodynamics Analysis")
+        print("4. Exit Toolbox")
         
-        choice = input("\nSelect an option (1-3): ")
+        choice = input("\nSelect an option (1-4): ")
         
         if choice == '1': 
             compare_methods_flow()
         elif choice == '2': 
             compare_methods_heat()
-        elif choice == '3': 
+        elif choice == '3':
+            airfoil_analysis()
+        elif choice == '4': 
             print("\nExiting Toolbox. Goodbye! 👋")
             break
         else: 
-            print("\n❌ Invalid choice. Please type 1, 2, or 3.")
+            print("\n❌ Invalid choice. Please type 1, 2, 3, or 4.")
             continue
             
         # The new prompt to keep the user in the app!
