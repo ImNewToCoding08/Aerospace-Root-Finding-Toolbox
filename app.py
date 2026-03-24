@@ -184,7 +184,13 @@ st.markdown("A numerical methods library comparing **Newton-Raphson**, **Secant*
 
 # --- Sidebar Menu ---
 st.sidebar.header("⚙️ Select a Module")
-module = st.sidebar.radio("Choose a Test Case:", ["Compressible Flow (Area-Mach)", "Satellite Thermal Balance", "Airfoil Aerodynamics", "Transient Heat Transfer (ODE)"])
+module = st.sidebar.radio("Choose a Test Case:", [
+    "Compressible Flow (Area-Mach)", 
+    "Satellite Thermal Balance", 
+    "Airfoil Aerodynamics", 
+    "Transient Heat Transfer (ODE)",
+    "EMI & Signal Analysis"
+])
 
 # --- Helper Function for Plotting ---
 def plot_convergence(hist_b, hist_n, hist_s, title):
@@ -409,3 +415,108 @@ elif module == "Transient Heat Transfer (ODE)":
             text.set_color("#e2e8f0")
             
         st.pyplot(fig)
+
+# --- Module 5: EMI & Signal Analysis ---
+elif module == "EMI & Signal Analysis":
+    st.header("📡 EMI & Signal Analysis")
+    st.markdown("Analyzes Electromagnetic Interference, Signal Path Loss, Faraday Shielding Effectiveness, and Skin Depth phenomena.")
+    
+    col_alt, _ = st.columns(2)
+    altitude_toggle = col_alt.radio("Select Operating Environment:", ["Sea Level (Atmospheric Attenuation)", "High Altitude / Space (Vacuum)"])
+    
+    tab1, tab2, tab3 = st.tabs(["1. EMI Strength & Path Loss", "2. Shielding Effectiveness", "3. Skin Effect"])
+    
+    with tab1:
+        st.subheader("Free-Space Path Loss & Interference Decay")
+        c1, c2, c3 = st.columns(3)
+        frequency = c1.number_input("Frequency (Hz)", value=2.4e9, format="%e")
+        distance = c2.number_input("Distance (m)", value=100.0, step=10.0, min_value=1.0)
+        power_tx = c3.number_input("Transmitted Power (W)", value=10.0, step=1.0)
+        
+        if st.button("Calculate Signal Strengths"):
+            # Atmospheric loss model constraint based on altitude
+            atmos_loss_per_m = 0.005 if "Sea Level" in altitude_toggle else 0.0
+            
+            power_density = power_tx / (4 * math.pi * (distance**2))
+            
+            # Free Space Path Loss (dB) calculation
+            fspl = 20 * math.log10(distance) + 20 * math.log10(frequency) - 147.55
+            total_attenuation = fspl + (atmos_loss_per_m * distance)
+            
+            ptx_dbm = 10 * math.log10(power_tx * 1000)
+            prx_dbm = ptx_dbm - total_attenuation
+            
+            m1, m2, m3 = st.columns(3)
+            m1.metric("Interference (Power Density)", f"{power_density:.2e} W/m²")
+            m2.metric("Total Path Loss", f"{total_attenuation:.2f} dB")
+            m3.metric("Received Power (SNR)", f"{prx_dbm:.2f} dBm")
+            
+            # SAFE/UNSAFE Tolerance Check
+            if prx_dbm > -80:
+                st.success("✅ Signal Strength is Acceptable (> -80 dBm) -> SAFE")
+            else:
+                st.error("⚠️ Signal too weak or Interference decayed (< -80 dBm) -> UNSAFE")
+                
+            # Plot Attenuation decay vs Distance
+            distances = [d for d in range(1, int(distance)*2, int(max(1, distance//10)))]
+            attenuations = [(20 * math.log10(d) + 20 * math.log10(frequency) - 147.55 + atmos_loss_per_m*d) for d in distances]
+            
+            fig, ax = plt.subplots(figsize=(10, 4))
+            fig.patch.set_facecolor('#0a0e17')
+            ax.set_facecolor('#111827')
+            ax.plot(distances, attenuations, color='#00d2ff', linewidth=2)
+            ax.set_xlabel("Distance (m)").set_color('#e2e8f0')
+            ax.set_ylabel("Attenuation (dB)").set_color('#e2e8f0')
+            ax.set_title("Signal Attenuation vs. Distance").set_color('#e2e8f0')
+            ax.tick_params(colors='#e2e8f0')
+            for spine in ax.spines.values(): spine.set_color('#334155')
+            ax.grid(True, ls='--', alpha=0.2, color='#e2e8f0')
+            st.pyplot(fig)
+            
+    with tab2:
+        st.subheader("Faraday Shielding Effectiveness")
+        c4, c5, c6 = st.columns(3)
+        freq_shield = c4.number_input("Field Frequency (Hz)", value=1e6, format="%e", key="fs")
+        thickness = c5.number_input("Shield Thickness (m)", value=0.001, format="%.4f")
+        sigma_r = c6.number_input("Relative Conductivity (σ_r)", value=1.0) # 1.0 approx Copper
+        
+        if st.button("Evaluate Shielding"):
+            mu_r = 1.0 # Default permeability for non-magnetic shield
+            
+            # dB Absorption Loss (A)
+            A = 131.4 * thickness * math.sqrt(freq_shield * mu_r * sigma_r)
+            # dB Reflection Loss (R)
+            R = 168 - 10 * math.log10((mu_r * freq_shield) / sigma_r)
+            SE = max(0.0, A + R)
+            
+            m4, m5, m6 = st.columns(3)
+            m4.metric("Absorption Loss", f"{A:.2f} dB")
+            m5.metric("Reflection Loss", f"{R:.2f} dB")
+            m6.metric("Total Shielding Effectiveness", f"{SE:.2f} dB")
+            
+            if SE > 30:
+                st.success("✅ Shielding Effectiveness > 30 dB -> SAFE")
+            else:
+                st.error("⚠️ Shielding Effectiveness < 30 dB -> UNSAFE")
+                
+    with tab3:
+        st.subheader("Skin Effect Penetration Depth")
+        c7, c8, c9 = st.columns(3)
+        freq_skin = c7.number_input("Operating Frequency (Hz)", value=60.0, format="%e", key="fsk")
+        cond = c8.number_input("Conductivity (S/m)", value=5.96e7, format="%e") # Copper base
+        perm_r = c9.number_input("Relative Permeability", value=1.0)
+        
+        if st.button("Calculate Skin Depth"):
+            mu_0 = 4 * math.pi * 1e-7
+            mu = perm_r * mu_0
+            try:
+                skin_depth = math.sqrt(1 / (math.pi * freq_skin * mu * cond))
+            except ZeroDivisionError:
+                skin_depth = float('inf')
+            
+            st.metric("Skin Depth (δ)", f"{skin_depth:.4e} meters")
+            
+            if skin_depth > 0.01:
+                st.warning("⚠️ Deep structural penetration at this frequency.")
+            else:
+                st.success("✅ RF current is safely confined to the surface layer.")

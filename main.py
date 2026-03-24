@@ -198,6 +198,66 @@ def transient_heating():
     print(f"  Final Temp (Euler 1st Order):       {final_euler:.2f} K")
     print(f"  Final Temp (Runge-Kutta 4th Order): {final_rk4:.2f} K")
 
+def emi_signal_analysis():
+    """Test Case 5: EMI & Signal Analysis"""
+    print("\n--- 📡 TEST CASE 5: EMI & SIGNAL ANALYSIS ---")
+    import math
+    def get_input(prompt, default_val):
+        val = input(prompt)
+        return float(val) if val.strip() else default_val
+
+    try:
+        print("\n[1. Free-Space Path Loss & Interference]")
+        freq = get_input("  Enter Frequency [Hz] (default 2.4e9): ", 2.4e9)
+        dist = get_input("  Enter Distance [m] (default 100.0): ", 100.0)
+        ptx = get_input("  Enter Transmitted Power [W] (default 10.0): ", 10.0)
+        
+        power_density = ptx / (4 * math.pi * (dist**2))
+        fspl = 20 * math.log10(dist) + 20 * math.log10(freq) - 147.55
+        prx_dbm = 10 * math.log10(ptx * 1000) - fspl
+        
+        print(f"  -> Interference (Pwr Dens):      {power_density:.2e} W/m^2")
+        print(f"  -> Total Path Loss (FSPL):       {fspl:.2f} dB")
+        print(f"  -> Received Power (SNR):         {prx_dbm:.2f} dBm")
+        if prx_dbm > -80:
+            print("  ✅ Signal Strength ACCEPTABLE (> -80 dBm)")
+        else:
+            print("  ⚠️ WARNING: Signal too weak (< -80 dBm)")
+    
+        print("\n[2. Faraday Shielding]")
+        freq_shield = get_input("  Enter Field Frequency [Hz] (default 1e6): ", 1e6)
+        thickness = get_input("  Enter Shield Thickness [m] (default 0.001): ", 0.001)
+        sigma_r = get_input("  Enter Relative Conductivity (default 1.0): ", 1.0)
+        mu_r = 1.0
+        
+        A = 131.4 * thickness * math.sqrt(freq_shield * mu_r * sigma_r)
+        R = 168 - 10 * math.log10((mu_r * freq_shield) / sigma_r)
+        SE = max(0.0, A + R)
+        
+        print(f"  -> Total Shielding Effect:       {SE:.2f} dB")
+        if SE > 30:
+            print("  ✅ Shielding Effectiveness SAFE (> 30 dB)")
+        else:
+            print("  ⚠️ WARNING: Shielding Effectiveness VERY LOW (< 30 dB)")
+    
+        print("\n[3. Skin Effect]")
+        freq_skin = get_input("  Enter Operating Frequency [Hz] (default 60.0): ", 60.0)
+        cond = get_input("  Enter Conductivity [S/m] (default 5.96e7): ", 5.96e7)
+        
+        try:
+            mu = 4 * math.pi * 1e-7
+            skin_depth = math.sqrt(1 / (math.pi * freq_skin * mu * cond))
+        except ZeroDivisionError:
+            skin_depth = float('inf')
+            
+        print(f"  -> Skin Depth (delta):           {skin_depth:.4e} meters")
+        if skin_depth > 0.01:
+            print("  ⚠️ WARNING: Deep structural penetration.")
+        else:
+            print("  ✅ RF current confined to surface layer.")
+    except ValueError:
+        print("❌ Invalid input! Returning to menu...")
+
 def main_menu():
     """The main interface for the toolbox."""
     while True:
@@ -209,9 +269,10 @@ def main_menu():
         print("2. Compare Methods on Implicit Heat Transfer")
         print("3. Airfoil Aerodynamics Analysis")
         print("4. Transient Heat Transfer (ODE)")
-        print("5. Exit Toolbox")
+        print("5. EMI & Signal Analysis")
+        print("6. Exit Toolbox")
         
-        choice = input("\nSelect an option (1-5): ")
+        choice = input("\nSelect an option (1-6): ")
         
         if choice == '1': 
             compare_methods_flow()
@@ -221,11 +282,13 @@ def main_menu():
             airfoil_analysis()
         elif choice == '4':
             transient_heating()
-        elif choice == '5': 
+        elif choice == '5':
+            emi_signal_analysis()
+        elif choice == '6': 
             print("\nExiting Toolbox. Goodbye! 👋")
             break
         else: 
-            print("\n❌ Invalid choice. Please type 1, 2, 3, 4, or 5.")
+            print("\n❌ Invalid choice. Please type 1, 2, 3, 4, 5, or 6.")
             continue
             
         # The new prompt to keep the user in the app!
